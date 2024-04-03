@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="login-page">
     <login-page-form />
   </div>
 </template>
@@ -13,4 +13,11 @@ export default {
 }
 </script>
 
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+.login-page {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}
+</style>

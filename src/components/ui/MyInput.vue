@@ -1,13 +1,14 @@
 <template>
-  <div>
+  <div class="my-input">
     <input
       v-bind="$attrs"
       :value="modelValue"
       @input="updateInput"
       @keypress="validateInput"
-      class="input"
+      class="my-input--field"
+      :class="[errorMessage && 'invalid']"
     />
-    <span v-if="errorMessage" class="error-message">{{ errorMessage }}</span>
+    <span v-if="errorMessage" class="my-input--message">{{ errorMessage }}</span>
   </div>
 </template>
 
@@ -44,15 +45,21 @@ export default {
 }
 </script>
 
-<style scoped>
-.input {
-  width: 100%;
-  border: 1px solid teal;
-  padding: 10px 15px;
-  margin-top: 15px;
-}
-.error-message {
-  color: red;
-  margin-top: 5px;
+<style scoped lang="scss">
+.my-input {
+  &--field {
+    width: 100%;
+    padding: 10px;
+    border-radius: 5px;
+    &.invalid {
+      border-color: red;
+    }
+  }
+
+  &--message {
+    color: red;
+    margin-top: 5px;
+    font-size: 15px;
+  }
 }
 </style>

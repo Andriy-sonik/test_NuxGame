@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import api from '@/api'
+const FAVORITE_TODOS = 'FAVORITE_TODOS'
 
 export const useTodosStore = defineStore('todos', {
   state: () => ({ todos: [] }),
@@ -10,7 +11,7 @@ export const useTodosStore = defineStore('todos', {
     async getAllTodos() {
       try {
         const { data } = await api.todos.todos()
-        const favoriteTodos = JSON.parse(localStorage.getItem('FAVORITE_TODOS')) || []
+        const favoriteTodos = JSON.parse(localStorage.getItem(FAVORITE_TODOS)) || []
 
         this.todos = [...data].map((task) => ({
           ...task,
@@ -32,7 +33,7 @@ export const useTodosStore = defineStore('todos', {
     changeStatusFavorite(id) {
       const currentTask = this.todos.find((task) => task.id === +id)
       currentTask.favorite = !currentTask.favorite
-      let favoriteTodos = JSON.parse(localStorage.getItem('FAVORITE_TODOS')) || []
+      let favoriteTodos = JSON.parse(localStorage.getItem(FAVORITE_TODOS)) || []
 
       if (!favoriteTodos.includes(id)) {
         favoriteTodos.push(id)
@@ -40,7 +41,11 @@ export const useTodosStore = defineStore('todos', {
         favoriteTodos = favoriteTodos.filter((fav) => fav !== id)
       }
 
-      localStorage.setItem('FAVORITE_TODOS', JSON.stringify(favoriteTodos))
+      localStorage.setItem(FAVORITE_TODOS, JSON.stringify(favoriteTodos))
+    },
+    onChangeStatustask(id) {
+      const currentTask = this.todos.find((task) => task.id === +id)
+      currentTask.completed = !currentTask.completed
     }
   }
 })

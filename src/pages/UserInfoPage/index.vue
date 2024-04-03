@@ -1,39 +1,49 @@
 <template>
-  <div>
-    <section>
-      <h2>User information</h2>
-      <user-info :user-info="currentUser" />
+  <div class="user-page">
+    <section class="card">
+      <h2 class="card-title">User information</h2>
+      <div class="card-body">
+        <user-info :user-info="currentUser" />
+      </div>
     </section>
 
-    <section>
-      <h2>Create task</h2>
-      <form-create-task />
+    <section class="card">
+      <h2 class="card-title">Create task</h2>
+      <div class="card-body">
+        <form-create-task />
+      </div>
     </section>
 
-    <section>
-      <h2>TODO tools</h2>
-      <my-input v-model="search" placeholder="Search" />
+    <section class="card">
+      <h2 class="card-title">TODO tools</h2>
+      <div class="card-body">
+        <my-input v-model="search" placeholder="Search" />
+        <hr />
 
-      <my-select
-        :model-value="FilterUser"
-        @update:model-value="onSelectFilterUser"
-        :options="usersListIds"
-      />
+        <div class="card-body--filters">
+          <my-select
+            :model-value="FilterUser"
+            @update:model-value="onSelectFilterUser"
+            :options="usersListIds"
+          />
 
-      <my-select
-        :model-value="FilterStatus"
-        @update:model-value="onSelectFilterStatus"
-        :options="optionFilterStatus"
-      />
+          <my-select
+            :model-value="FilterStatus"
+            @update:model-value="onSelectFilterStatus"
+            :options="optionFilterStatus"
+          />
+        </div>
+      </div>
     </section>
 
-    <section>
-      <h2>TODO list</h2>
-      <div class="todo-list">
+    <section class="card">
+      <h2 class="card-title">TODO list</h2>
+      <div class="card-body">
         <todo-item
           v-for="todoItem of sortedAndSearchedTodos"
           :key="todoItem.id"
           :item="todoItem"
+          @on-change="onChangeStatustask(todoItem.id)"
           @addToFavorite="addToFavorite"
         />
       </div>
@@ -119,7 +129,7 @@ export default {
   },
   methods: {
     ...mapActions(useUsersStore, ['getAllUsers']),
-    ...mapActions(useTodosStore, ['getAllTodos', 'changeStatusFavorite']),
+    ...mapActions(useTodosStore, ['getAllTodos', 'changeStatusFavorite', 'onChangeStatustask']),
 
     onSelectFilterStatus(value) {
       this.FilterStatus = !isNaN(value) ? +value : value
@@ -142,8 +152,38 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.todo-wrapper {
+.user-page {
   display: flex;
+  flex-direction: column;
   gap: 15px;
+}
+
+.card {
+  background-color: #c3c3c3;
+  border-radius: 5px;
+  overflow: hidden;
+
+  &-title {
+    background-color: #a5a5a5;
+    font-size: 17px;
+    line-height: 21px;
+    color: #5f5f5f;
+    text-align: center;
+    padding: 15px;
+  }
+  &-body {
+    padding: 15px 25px 30px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    &--filters {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      select {
+        flex: 1;
+      }
+    }
+  }
 }
 </style>

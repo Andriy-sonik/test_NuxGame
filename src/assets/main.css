@@ -1,15 +1,8 @@
 @import './base.css';
 
-/* #app {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  font-weight: normal;
-} */
 html,
 body {
   height: 100%;
-  color: #fff;
 }
 #app {
   display: flex;
@@ -30,11 +23,25 @@ footer {
 main {
   background-color: #545454;
   flex: 1 0 auto;
+  display: flex;
 }
+
+.container {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 16px;
+  width: 100%;
+}
+
 table {
   text-align: left;
 }
+
+table,
+th,
+td {
+  border: 1px solid;
+}
 th {
-  text-decoration: underline;
-  color: lightblue;
+  text-transform: capitalize;
 }

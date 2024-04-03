@@ -1,8 +1,8 @@
 <template>
-  <form @submit.prevent="createTask" class="form">
+  <form @submit.prevent="createTask" class="form-create-task">
     <my-input v-model="userId" placeholder="Input userID" />
     <my-input v-model="title" placeholder="Input title" />
-    <my-button>Create</my-button>
+    <my-button class="success">Create</my-button>
   </form>
 </template>
 
@@ -32,4 +32,10 @@ export default {
 }
 </script>
 
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+.form-create-task {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+</style>
