@@ -30,7 +30,7 @@ export default {
 
     validateInput(event) {
       let pattern = this.$attrs?.regexp && new RegExp(this.$attrs.regexp)
-      console.log('pattern', pattern)
+
       if (!pattern) return
 
       if (!pattern.test(event.key)) {

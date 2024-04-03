@@ -1,7 +1,6 @@
-<!-- eslint-disable vue/no-mutating-props -->
 <template>
-  <select v-model="modelValue" @change="changeOption">
-    <option disabled value="">Выберите из списка</option>
+  <select :value="modelValue" @change="changeOption">
+    <option disabled value="">{{ defaultTitle }}</option>
     <option v-for="option in options" :key="option.value" :value="option.value">
       {{ option.name }}
     </option>
@@ -13,11 +12,15 @@ export default {
   name: 'mySelect',
   props: {
     modelValue: {
-      type: String
+      type: [String, Number]
     },
     options: {
       type: Array,
       default: () => []
+    },
+    defaultTitle: {
+      type: String,
+      default: 'Выберите из списка'
     }
   },
   methods: {

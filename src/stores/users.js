@@ -10,7 +10,10 @@ export const useUsersStore = defineStore('users', {
       return state.users.find((user) => +user.id === +getUserIdFromUrl(window.location.href))
     },
     usersListIds: (state) => {
-      return state.users.map((user) => user.id)
+      return [
+        { value: 0, name: 'All users' },
+        ...state.users.map((user) => ({ value: user.id, name: user.id }))
+      ]
     }
   },
   actions: {

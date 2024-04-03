@@ -33,3 +33,6 @@ npm run build
 ```sh
 npm run lint
 ```
+
+https://jsonplaceholder.typicode.com/
+https://www.ajax.test-danit.com/api-pages/jsonplaceholder.html

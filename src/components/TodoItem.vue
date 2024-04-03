@@ -4,6 +4,9 @@
     <div>
       <input type="checkbox" :checked="item.completed" />
       <h3>{{ item.title }}</h3>
+      <my-button @click="$emit('addToFavorite', item.id)">
+        {{ item.favorite ? 'видалити з обраних' : 'додати в обрані' }}
+      </my-button>
     </div>
   </div>
 </template>

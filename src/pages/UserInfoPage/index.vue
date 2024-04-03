@@ -1,39 +1,41 @@
 <template>
   <div>
     <section>
-      <h2>user information</h2>
+      <h2>User information</h2>
       <user-info :user-info="currentUser" />
     </section>
+
     <section>
-      <h2>Create todo"</h2>
-      <form @submit.prevent="submitNewTodo">
-        <input type="text" v-model="user.title" placeholder="title" />
-        <input type="text" v-model="user.id" placeholder="id" />
-        <button>ok</button>
-      </form>
+      <h2>Create task</h2>
+      <form-create-task />
     </section>
+
     <section>
-      <h2>TODO</h2>
-      <div class="todo-wrapper">
-        <aside class="todo-toolbar">
-          <select :value="selectedStatus" @change="changeOption">
-            <option :value="filterItem" v-for="filterItem of optionFilter" :key="filterItem">
-              {{ filterItem }}
-            </option>
-          </select>
+      <h2>TODO tools</h2>
+      <my-input v-model="search" placeholder="Search" />
 
-          <select :value="selectedAutor" @change="changeOptionAutor">
-            <option value="">All Users</option>
-            <option :value="filterItem" v-for="filterItem of usersListIds" :key="filterItem">
-              {{ filterItem }}
-            </option>
-          </select>
-          <input type="text" v-model="search" />
-        </aside>
+      <my-select
+        :model-value="FilterUser"
+        @update:model-value="onSelectFilterUser"
+        :options="usersListIds"
+      />
 
-        <div class="todo-list">
-          <todo-item v-for="todoItem of todosSearch" :key="todoItem.id" :item="todoItem" />
-        </div>
+      <my-select
+        :model-value="FilterStatus"
+        @update:model-value="onSelectFilterStatus"
+        :options="optionFilterStatus"
+      />
+    </section>
+
+    <section>
+      <h2>TODO list</h2>
+      <div class="todo-list">
+        <todo-item
+          v-for="todoItem of sortedAndSearchedTodos"
+          :key="todoItem.id"
+          :item="todoItem"
+          @addToFavorite="addToFavorite"
+        />
       </div>
     </section>
   </div>
@@ -41,91 +43,100 @@
 
 <script>
 import UserInfo from '@/pages/UserInfoPage/components/UserInfo.vue'
-import api from '@/api'
-import TodoItem from '@/components/ui/TodoItem.vue'
+import FormCreateTask from '@/pages/UserInfoPage/components/FormCreateTask.vue'
+import TodoItem from '@/components/TodoItem.vue'
 import { mapState, mapActions } from 'pinia'
 import { useUsersStore } from '@/stores/users'
-const optionFilter = ['completed', 'uncompleted', 'favorites']
+import { useTodosStore } from '@/stores/todos'
+
+const optionFilter = [
+  { value: 0, name: 'All' },
+  { value: 'completed', name: 'Completed' },
+  { value: 'uncompleted', name: 'Uncompleted' },
+  { value: 'favorites', name: 'Favorites' }
+]
 export default {
   name: 'UserInfoPage',
   components: {
     UserInfo,
-    TodoItem
+    TodoItem,
+    FormCreateTask
   },
   data() {
     return {
-      todos: [],
-      selectedStatus: null,
-      selectedAutor: null,
-      search: '',
-      user: {
-        title: '',
-        id: null
-      }
+      FilterStatus: 0,
+      FilterUser: 0,
+      search: ''
     }
   },
   computed: {
     ...mapState(useUsersStore, ['users', 'currentUser', 'usersListIds']),
+    ...mapState(useTodosStore, ['todos']),
 
-    optionFilter() {
-      console.log('optionFilter', optionFilter)
+    optionFilterStatus() {
       return optionFilter
     },
-    todosSearch() {
-      return this.todosFiltered.filter((task) =>
+
+    sortedAndSearchedTodos() {
+      return this.sortedTodos.filter((task) =>
         task.title.toLowerCase().includes(this.search.toLowerCase())
       )
     },
+    sortedTodos() {
+      const { FilterStatus, FilterUser, todos } = this
 
-    todosFiltered() {
-      return this.todos.filter((task) => {
-        // Фільтр за обраною автором
-        const filterByAutor = !this.selectedAutor || task.userId === +this.selectedAutor
+      if (!FilterStatus && !FilterUser) return todos
 
-        // Фільтр за статусом
-        const filterByStatus =
-          !this.selectedStatus ||
-          (this.selectedStatus === 'completed' && task.completed) ||
-          (this.selectedStatus === 'uncompleted' && !task.completed)
+      if (FilterUser && FilterStatus) {
+        return todos.filter((task) => {
+          return (
+            task.userId === +FilterUser &&
+            (FilterStatus === 'completed'
+              ? task.completed
+              : FilterStatus === 'uncompleted'
+                ? !task.completed
+                : task?.favorite)
+          )
+        })
+      }
 
-        // Повертаємо true, якщо обидва фільтри виконуються
-        return filterByAutor && filterByStatus
-      })
+      if (FilterUser) {
+        return todos.filter((task) => task.userId === +FilterUser)
+      }
+
+      if (FilterStatus) {
+        return todos.filter((task) => {
+          return FilterStatus === 'completed'
+            ? task.completed
+            : FilterStatus === 'uncompleted'
+              ? !task.completed
+              : task?.favorite
+        })
+      }
+
+      return todos
     }
   },
   methods: {
     ...mapActions(useUsersStore, ['getAllUsers']),
-    async getUsers() {
-      const responce = await api.users.users({ params: { id: this.$route.params.userId } })
-      console.log('responce', responce)
-      return responce.data
-    },
-    async getTodos() {
-      const responce = await api.todos.todos()
-      console.log('responce', responce)
-      return responce.data
+    ...mapActions(useTodosStore, ['getAllTodos', 'changeStatusFavorite']),
+
+    onSelectFilterStatus(value) {
+      this.FilterStatus = !isNaN(value) ? +value : value
     },
 
-    changeOption(event) {
-      this.selectedStatus = event.target.value
-    },
-    changeOptionAutor(event) {
-      this.selectedAutor = event.target.value
-      console.log(this.selectedAutor)
+    onSelectFilterUser(value) {
+      this.FilterUser = +value
     },
 
-    async submitNewTodo() {
-      const { data } = await api.todos.addNewTodo({ userId: +this.user.id, title: this.user.title })
-      console.log('responce', data)
-      this.todos.push(data)
-      this.user.title = ''
-      this.user.id = ''
+    addToFavorite(id) {
+      this.changeStatusFavorite(id)
     }
   },
+
   async mounted() {
     await this.getAllUsers()
-    this.todos = await this.getTodos()
-    console.log('usersListIds', this.usersListIds)
+    await this.getAllTodos()
   }
 }
 </script>
