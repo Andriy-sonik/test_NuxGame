@@ -84,6 +84,7 @@ export default {
   margin: 0 auto;
   background-color: #c3c3c3;
   border-radius: 5px;
+  overflow: hidden;
 
   &--title,
   &--caption {

@@ -1,6 +1,6 @@
 <template>
   <form @submit.prevent="createTask" class="form-create-task">
-    <my-input v-model="userId" placeholder="Input userID" />
+    <my-input v-model="userId" placeholder="Input userID" :regexp="/^\d+$/" />
     <my-input v-model="title" placeholder="Input title" />
     <my-button class="success">Create</my-button>
   </form>

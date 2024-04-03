@@ -39,6 +39,7 @@
     <section class="card">
       <h2 class="card-title">TODO list</h2>
       <div class="card-body">
+        <p v-if="!sortedAndSearchedTodos.length">No data</p>
         <todo-item
           v-for="todoItem of sortedAndSearchedTodos"
           :key="todoItem.id"
