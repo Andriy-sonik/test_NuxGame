@@ -4,13 +4,8 @@
   </div>
 </template>
 
-<script>
+<script setup>
 import LoginPageForm from '@/pages/LoginPage/components/LoginPageForm.vue'
-export default {
-  components: {
-    LoginPageForm
-  }
-}
 </script>
 
 <style lang="scss" scoped>

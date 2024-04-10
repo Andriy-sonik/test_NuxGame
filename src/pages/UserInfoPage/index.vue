@@ -3,7 +3,7 @@
     <section class="card">
       <h2 class="card-title">User information</h2>
       <div class="card-body">
-        <user-info :user-info="currentUser" />
+        <user-info :user-info="storeUsers.currentUser" />
       </div>
     </section>
 
@@ -24,13 +24,13 @@
           <my-select
             :model-value="FilterUser"
             @update:model-value="onSelectFilterUser"
-            :options="usersListIds"
+            :options="storeUsers.usersListIds"
           />
 
           <my-select
             :model-value="FilterStatus"
             @update:model-value="onSelectFilterStatus"
-            :options="optionFilterStatus"
+            :options="OPTION_FILTER"
           />
         </div>
       </div>
@@ -52,103 +52,80 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { ref, onMounted, computed } from 'vue'
+import { useUsersStore } from '@/stores/users.js'
+import { useTodosStore } from '@/stores/todos.js'
 import UserInfo from '@/pages/UserInfoPage/components/UserInfo.vue'
 import FormCreateTask from '@/pages/UserInfoPage/components/FormCreateTask.vue'
 import TodoItem from '@/components/TodoItem.vue'
-import { mapState, mapActions } from 'pinia'
-import { useUsersStore } from '@/stores/users'
-import { useTodosStore } from '@/stores/todos'
 
-const optionFilter = [
+const OPTION_FILTER = [
   { value: 0, name: 'All' },
   { value: 'completed', name: 'Completed' },
   { value: 'uncompleted', name: 'Uncompleted' },
   { value: 'favorites', name: 'Favorites' }
 ]
-export default {
-  name: 'UserInfoPage',
-  components: {
-    UserInfo,
-    TodoItem,
-    FormCreateTask
-  },
-  data() {
-    return {
-      FilterStatus: 0,
-      FilterUser: 0,
-      search: ''
-    }
-  },
-  computed: {
-    ...mapState(useUsersStore, ['users', 'currentUser', 'usersListIds']),
-    ...mapState(useTodosStore, ['todos']),
 
-    optionFilterStatus() {
-      return optionFilter
-    },
+const FilterStatus = ref(0)
+const FilterUser = ref(0)
+const search = ref('')
 
-    sortedAndSearchedTodos() {
-      return this.sortedTodos.filter((task) =>
-        task.title.toLowerCase().includes(this.search.toLowerCase())
+const storeUsers = useUsersStore()
+const storeTodos = useTodosStore()
+
+onMounted(async () => await storeUsers.getAllUsers())
+onMounted(async () => await storeTodos.getAllTodos())
+
+const onChangeStatustask = storeTodos.onChangeStatustask
+
+const sortedTodos = computed(() => {
+  if (!FilterStatus.value && !FilterUser.value) return storeTodos.todos
+
+  if (FilterUser.value && FilterStatus.value) {
+    return storeTodos.todos.filter((task) => {
+      return (
+        task.userId === +FilterUser.value &&
+        (FilterStatus.value === 'completed'
+          ? task.completed
+          : FilterStatus.value === 'uncompleted'
+            ? !task.completed
+            : task?.favorite)
       )
-    },
-    sortedTodos() {
-      const { FilterStatus, FilterUser, todos } = this
-
-      if (!FilterStatus && !FilterUser) return todos
-
-      if (FilterUser && FilterStatus) {
-        return todos.filter((task) => {
-          return (
-            task.userId === +FilterUser &&
-            (FilterStatus === 'completed'
-              ? task.completed
-              : FilterStatus === 'uncompleted'
-                ? !task.completed
-                : task?.favorite)
-          )
-        })
-      }
-
-      if (FilterUser) {
-        return todos.filter((task) => task.userId === +FilterUser)
-      }
-
-      if (FilterStatus) {
-        return todos.filter((task) => {
-          return FilterStatus === 'completed'
-            ? task.completed
-            : FilterStatus === 'uncompleted'
-              ? !task.completed
-              : task?.favorite
-        })
-      }
-
-      return todos
-    }
-  },
-  methods: {
-    ...mapActions(useUsersStore, ['getAllUsers']),
-    ...mapActions(useTodosStore, ['getAllTodos', 'changeStatusFavorite', 'onChangeStatustask']),
-
-    onSelectFilterStatus(value) {
-      this.FilterStatus = !isNaN(value) ? +value : value
-    },
-
-    onSelectFilterUser(value) {
-      this.FilterUser = +value
-    },
-
-    addToFavorite(id) {
-      this.changeStatusFavorite(id)
-    }
-  },
-
-  async mounted() {
-    await this.getAllUsers()
-    await this.getAllTodos()
+    })
   }
+
+  if (FilterUser.value) {
+    return storeTodos.todos.filter((task) => task.userId === +FilterUser.value)
+  }
+
+  if (FilterStatus.value) {
+    return storeTodos.todos.filter((task) => {
+      return FilterStatus.value === 'completed'
+        ? task.completed
+        : FilterStatus.value === 'uncompleted'
+          ? !task.completed
+          : task?.favorite
+    })
+  }
+
+  return storeTodos.todos
+})
+
+const sortedAndSearchedTodos = computed(() =>
+  sortedTodos.value.filter((task) => task.title.toLowerCase().includes(search.value.toLowerCase()))
+)
+
+const addToFavorite = (ID) => {
+  storeTodos.changeStatusFavorite(ID)
+}
+
+const onSelectFilterUser = (value) => {
+  FilterUser.value = +value
+}
+
+const onSelectFilterStatus = (value) => {
+  FilterStatus.value = !isNaN(value) ? +value : value
 }
 </script>
 

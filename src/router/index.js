@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import { LAYOUTS } from '@/constants/index.js'
 import LoginPage from '../pages/LoginPage/index.vue'
 
 const router = createRouter({
@@ -8,13 +9,13 @@ const router = createRouter({
       path: '/',
       name: 'home',
       component: LoginPage,
-      meta: { layout: 'main' }
+      meta: { layout: LAYOUTS.MAIN }
     },
     {
       path: '/user/:userId',
       name: 'user',
       component: () => import('../pages/UserInfoPage/index.vue'),
-      meta: { layout: 'main' }
+      meta: { layout: LAYOUTS.MAIN }
     }
   ]
 })

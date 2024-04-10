@@ -13,15 +13,10 @@
   </table>
 </template>
 
-<script>
-export default {
-  name: 'UserInfo',
-  props: {
-    userInfo: {
-      type: Object
-    }
-  }
-}
+<script setup>
+defineProps({
+  userInfo: Object
+})
 </script>
 
 <style lang="scss" scoped></style>

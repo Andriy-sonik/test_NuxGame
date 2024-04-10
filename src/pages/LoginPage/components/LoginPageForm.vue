@@ -6,73 +6,62 @@
       <my-input
         v-model="username"
         placeholder="Username"
-        :regexp="/^[a-zA-Zа-яА-ЯёЁґҐіІїЇєЄ ]*$/"
+        :regexp="ALPHA_SPACE_REGEX"
         autofocus
         class="login-form--input mb-20"
       />
       <my-input
         v-model="phoneNumber"
         placeholder="Phone Number"
-        :regexp="/[^a-zA-Zа-яА-ЯёЁґҐіІїЇєЄ]/"
+        :regexp="NON_ALPHA_REGEX"
         class="login-form--input"
       />
       <my-button class="login-form--submit">Register</my-button>
     </fieldset>
+
     <p class="login-form--message" v-if="errorMessage">{{ errorMessage }}</p>
   </form>
 </template>
 
-<script>
-import { mapState, mapActions } from 'pinia'
-import { useUsersStore } from '@/stores/users'
+<script setup>
+import { ref, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
+import { REGEXP } from '@/constants/index.js'
+import { useUsersStore } from '@/stores/users.js'
 
-export default {
-  name: 'LoginPageForm',
-  data() {
-    return {
-      username: 'Leanne Graham',
-      phoneNumber: '1-770-736-8031 x56442',
-      errorMessage: ''
-    }
-  },
-  computed: {
-    ...mapState(useUsersStore, ['users'])
-  },
+const { ALPHA_SPACE_REGEX, NON_ALPHA_REGEX } = REGEXP
+const router = useRouter()
+const username = ref('Leanne Graham')
+const phoneNumber = ref('1-770-736-8031 x56442')
+const errorMessage = ref('')
+const store = useUsersStore()
+onMounted(async () => await store.getAllUsers())
 
-  async mounted() {
-    await this.getAllUsers()
-  },
+const chackIsUser = () => {
+  if (!store.users.length) return false
 
-  methods: {
-    ...mapActions(useUsersStore, ['getAllUsers']),
+  return store.users.find(
+    (user) => user.name === username.value && user.phone === phoneNumber.value
+  )
+}
 
-    chackIsUser() {
-      if (!this.users.length) return false
+const clearFieldsInForm = () => {
+  username.value = ''
+  phoneNumber.value = ''
+  errorMessage.value = ''
+}
 
-      return this.users.find(
-        (user) => user.name === this.username && user.phone === this.phoneNumber
-      )
-    },
+const onSubmit = () => {
+  const currentUser = chackIsUser()
 
-    clearFieldsInForm() {
-      this.username = ''
-      this.phoneNumber = ''
-      this.errorMessage = ''
-    },
-
-    onSubmit() {
-      const currentUser = this.chackIsUser()
-
-      if (currentUser) {
-        this.$router.push({
-          name: 'user',
-          params: { userId: currentUser.id }
-        })
-        this.clearFieldsInForm()
-      } else {
-        this.errorMessage = 'Такого  користувача не існує!!'
-      }
-    }
+  if (currentUser) {
+    router.push({
+      name: 'user',
+      params: { userId: currentUser.id }
+    })
+    clearFieldsInForm()
+  } else {
+    errorMessage.value = 'Такого  користувача не існує!!'
   }
 }
 </script>

@@ -1,34 +1,30 @@
 <template>
   <form @submit.prevent="createTask" class="form-create-task">
-    <my-input v-model="userId" placeholder="Input userID" :regexp="/^\d+$/" />
+    <my-input v-model="userId" placeholder="Input userID" :regexp="NUMBER_REGEX" />
     <my-input v-model="title" placeholder="Input title" />
     <my-button class="success">Create</my-button>
   </form>
 </template>
 
-<script>
-import { mapActions } from 'pinia'
-import { useTodosStore } from '@/stores/todos'
-export default {
-  name: 'FormCreateTask',
-  data() {
-    return {
-      title: '',
-      userId: ''
-    }
-  },
-  methods: {
-    ...mapActions(useTodosStore, ['addTodo']),
-    async createTask() {
-      await this.addTodo({ userId: +this.userId, title: this.title })
-      this.clearForm()
-    },
+<script setup>
+import { ref } from 'vue'
+import { REGEXP } from '@/constants/index.js'
+import { useTodosStore } from '@/stores/todos.js'
 
-    clearForm() {
-      this.title = ''
-      this.userId = ''
-    }
-  }
+const title = ref('')
+const userId = ref('')
+const { NUMBER_REGEX } = REGEXP
+
+const store = useTodosStore()
+
+const clearForm = () => {
+  title.value = ''
+  userId.value = ''
+}
+
+const createTask = () => {
+  store.addTodo({ userId: +userId.value, title: title.value })
+  clearForm()
 }
 </script>
 
