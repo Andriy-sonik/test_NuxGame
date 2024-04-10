@@ -23,10 +23,10 @@ export default {
       default: 'Выберите из списка'
     }
   },
-  methods: {
-    changeOption(event) {
-      this.$emit('update:modelValue', event.target.value)
-    }
+  emits: ['update:modelValue'],
+  setup(props, { emit }) {
+    const changeOption = (event) => emit('update:modelValue', event.target.value)
+    return { changeOption }
   }
 }
 </script>

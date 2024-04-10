@@ -1,29 +1,32 @@
+import api from '@/api'
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
-import api from '@/api'
-import { getUserIdFromUrl } from '@/helpers/index'
+import { useRoute } from 'vue-router'
 
 export const useUsersStore = defineStore('users', () => {
+  const route = useRoute()
+
+  // state
   const users = ref([])
 
-  const usersList = computed(() => users)
-  const currentUser = computed(() =>
-    users.value.find((user) => +user.id === +getUserIdFromUrl(window.location.href))
-  )
+  // getters
+  const currentUser = computed(() => users.value.find((user) => +user.id === +route.params.userId))
+
   const usersListIds = computed(() => [
-    { value: 0, name: 'All users' },
+    { value: 0, name: 'All' },
     ...users.value.map((user) => ({ value: user.id, name: user.id }))
   ])
 
-  async function getAllUsers() {
+  // actions
+  const getAllUsers = async () => {
     if (users.value.length) return
     try {
       const { data } = await api.users.getAllUsersData()
       users.value = data
     } catch (error) {
-      console.log('error->', { error })
+      console.error('Error fetching users:', error)
     }
   }
 
-  return { users, usersList, currentUser, usersListIds, getAllUsers }
+  return { users, currentUser, usersListIds, getAllUsers }
 })

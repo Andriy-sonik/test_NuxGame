@@ -1,46 +1,51 @@
 <template>
   <form @submit.prevent="onSubmit" class="login-form">
-    <h1 class="login-form--title">description</h1>
-    <fieldset class="login-form--body">
-      <h3 class="login-form--caption">description</h3>
+    <h1 class="login-form__title">description</h1>
+    <fieldset class="login-form__body">
+      <h3 class="login-form__caption">description</h3>
       <my-input
         v-model="username"
         placeholder="Username"
-        :regexp="ALPHA_SPACE_REGEX"
+        :regexp="REGEXP.ALPHA_SPACE_REGEX"
         autofocus
-        class="login-form--input mb-20"
+        class="login-form__input login-form__input--mb-20"
       />
       <my-input
         v-model="phoneNumber"
         placeholder="Phone Number"
-        :regexp="NON_ALPHA_REGEX"
-        class="login-form--input"
+        :regexp="REGEXP.NON_ALPHA_REGEX"
+        class="login-form__input"
       />
-      <my-button class="login-form--submit">Register</my-button>
+      <my-button class="login-form__submit">Register</my-button>
     </fieldset>
 
-    <p class="login-form--message" v-if="errorMessage">{{ errorMessage }}</p>
+    <p class="login-form__message" v-if="errorMessage">{{ errorMessage }}</p>
   </form>
 </template>
 
 <script setup>
 import { ref, onMounted } from 'vue'
+import { storeToRefs } from 'pinia'
 import { useRouter } from 'vue-router'
 import { REGEXP } from '@/constants/index.js'
 import { useUsersStore } from '@/stores/users.js'
+import { ROUTE } from '@/router/routeNames.js'
 
-const { ALPHA_SPACE_REGEX, NON_ALPHA_REGEX } = REGEXP
-const router = useRouter()
 const username = ref('Leanne Graham')
 const phoneNumber = ref('1-770-736-8031 x56442')
 const errorMessage = ref('')
-const store = useUsersStore()
-onMounted(async () => await store.getAllUsers())
 
-const chackIsUser = () => {
-  if (!store.users.length) return false
+const router = useRouter()
+const usersStore = useUsersStore()
+const { getAllUsers } = usersStore
+const { users } = storeToRefs(usersStore)
 
-  return store.users.find(
+onMounted(async () => await getAllUsers())
+
+const checkIfUserExists = () => {
+  if (!users.value.length) return false
+
+  return users.value.find(
     (user) => user.name === username.value && user.phone === phoneNumber.value
   )
 }
@@ -52,16 +57,16 @@ const clearFieldsInForm = () => {
 }
 
 const onSubmit = () => {
-  const currentUser = chackIsUser()
+  const currentUser = checkIfUserExists()
 
   if (currentUser) {
     router.push({
-      name: 'user',
+      name: ROUTE.USER.name,
       params: { userId: currentUser.id }
     })
     clearFieldsInForm()
   } else {
-    errorMessage.value = 'Такого  користувача не існує!!'
+    errorMessage.value = 'Incorrect data!'
   }
 }
 </script>
@@ -75,35 +80,35 @@ const onSubmit = () => {
   border-radius: 5px;
   overflow: hidden;
 
-  &--title,
-  &--caption {
+  &__title,
+  &__caption {
     line-height: 21px;
     color: #5f5f5f;
   }
 
-  &--title {
+  &__title {
     background-color: #a5a5a5;
     font-size: 17px;
     text-align: center;
     padding: 15px;
   }
 
-  &--body {
+  &__body {
     padding: 15px 25px 30px;
   }
 
-  &--caption {
+  &__caption {
     font-size: 15px;
     margin-bottom: 14px;
   }
 
-  &--input {
-    &.mb-20 {
+  &__input {
+    &--mb-20 {
       margin-bottom: 20px;
     }
   }
 
-  &--submit {
+  &__submit {
     margin-top: 25px;
     background-color: #519945;
     font-size: 17px;
@@ -111,7 +116,7 @@ const onSubmit = () => {
     font-weight: 600;
   }
 
-  &--message {
+  &__message {
     color: red;
     margin-top: 5px;
     font-size: 15px;

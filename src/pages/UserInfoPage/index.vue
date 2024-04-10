@@ -22,14 +22,14 @@
 
         <div class="card-body--filters">
           <my-select
-            :model-value="FilterUser"
-            @update:model-value="onSelectFilterUser"
+            :model-value="filterByUser"
+            @update:model-value="onSelectfilterByUser"
             :options="storeUsers.usersListIds"
           />
 
           <my-select
-            :model-value="FilterStatus"
-            @update:model-value="onSelectFilterStatus"
+            :model-value="filterByStatus"
+            @update:model-value="onSelectfilterByStatus"
             :options="OPTION_FILTER"
           />
         </div>
@@ -44,7 +44,7 @@
           v-for="todoItem of sortedAndSearchedTodos"
           :key="todoItem.id"
           :item="todoItem"
-          @on-change="onChangeStatustask(todoItem.id)"
+          @on-change="storeTodos.onChangeStatusTask(todoItem.id)"
           @addToFavorite="addToFavorite"
         />
       </div>
@@ -67,8 +67,8 @@ const OPTION_FILTER = [
   { value: 'favorites', name: 'Favorites' }
 ]
 
-const FilterStatus = ref(0)
-const FilterUser = ref(0)
+const filterByStatus = ref(0)
+const filterByUser = ref(0)
 const search = ref('')
 
 const storeUsers = useUsersStore()
@@ -77,33 +77,31 @@ const storeTodos = useTodosStore()
 onMounted(async () => await storeUsers.getAllUsers())
 onMounted(async () => await storeTodos.getAllTodos())
 
-const onChangeStatustask = storeTodos.onChangeStatustask
-
 const sortedTodos = computed(() => {
-  if (!FilterStatus.value && !FilterUser.value) return storeTodos.todos
+  if (!filterByStatus.value && !filterByUser.value) return storeTodos.todos
 
-  if (FilterUser.value && FilterStatus.value) {
+  if (filterByUser.value && filterByStatus.value) {
     return storeTodos.todos.filter((task) => {
       return (
-        task.userId === +FilterUser.value &&
-        (FilterStatus.value === 'completed'
+        task.userId === +filterByUser.value &&
+        (filterByStatus.value === 'completed'
           ? task.completed
-          : FilterStatus.value === 'uncompleted'
+          : filterByStatus.value === 'uncompleted'
             ? !task.completed
             : task?.favorite)
       )
     })
   }
 
-  if (FilterUser.value) {
-    return storeTodos.todos.filter((task) => task.userId === +FilterUser.value)
+  if (filterByUser.value) {
+    return storeTodos.todos.filter((task) => task.userId === +filterByUser.value)
   }
 
-  if (FilterStatus.value) {
+  if (filterByStatus.value) {
     return storeTodos.todos.filter((task) => {
-      return FilterStatus.value === 'completed'
+      return filterByStatus.value === 'completed'
         ? task.completed
-        : FilterStatus.value === 'uncompleted'
+        : filterByStatus.value === 'uncompleted'
           ? !task.completed
           : task?.favorite
     })
@@ -117,15 +115,15 @@ const sortedAndSearchedTodos = computed(() =>
 )
 
 const addToFavorite = (ID) => {
-  storeTodos.changeStatusFavorite(ID)
+  storeTodos.toggleFavoriteStatus(ID)
 }
 
-const onSelectFilterUser = (value) => {
-  FilterUser.value = +value
+const onSelectfilterByUser = (value) => {
+  filterByUser.value = +value
 }
 
-const onSelectFilterStatus = (value) => {
-  FilterStatus.value = !isNaN(value) ? +value : value
+const onSelectfilterByStatus = (value) => {
+  filterByStatus.value = !isNaN(value) ? +value : value
 }
 </script>
 

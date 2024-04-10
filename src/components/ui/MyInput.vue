@@ -13,34 +13,32 @@
 </template>
 
 <script>
+import { ref } from 'vue'
 export default {
   name: 'MyInput',
   props: {
     modelValue: [String, Number]
   },
-  data() {
-    return {
-      errorMessage: ''
-    }
-  },
+  emits: ['update:modelValue'],
+  setup(props, { emit, attrs }) {
+    const errorMessage = ref('')
 
-  methods: {
-    updateInput(event) {
-      this.$emit('update:modelValue', event.target.value)
-    },
+    const updateInput = (event) => emit('update:modelValue', event.target.value)
 
-    validateInput(event) {
-      let pattern = this.$attrs?.regexp && new RegExp(this.$attrs.regexp)
+    const validateInput = (event) => {
+      let pattern = attrs?.regexp && new RegExp(attrs.regexp)
 
       if (!pattern) return
 
       if (!pattern.test(event.key)) {
         event.preventDefault()
-        this.errorMessage = 'Недопустимий символ'
+        errorMessage.value = 'Недопустимий символ'
       } else {
-        this.errorMessage = ''
+        errorMessage.value = ''
       }
     }
+
+    return { errorMessage, updateInput, validateInput }
   }
 }
 </script>
